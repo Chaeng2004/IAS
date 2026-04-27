@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
-import { CRIMSON, CRIMSON_DARK, InputField } from "../shared";
-import { styles} from "../styles/authStyle"
+import  InputField  from "../shared/InputField";
+import { styles, CRIMSON, CRIMSON_DARK } from "../styles/authStyle";
 
 export default function Login({ onSuccess }) {
   const [email, setEmail] = useState("");
@@ -15,7 +15,8 @@ export default function Login({ onSuccess }) {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/login", {
+      const API_URL = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${API_URL}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email, password: password }) 
