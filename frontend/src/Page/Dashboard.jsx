@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { LogOut, ExternalLink, ShieldAlert, CheckCircle } from "lucide-react";
-import { CRIMSON, CRIMSON_DARK } from "./styles/authStyle"; 
+import { CRIMSON, CRIMSON_DARK } from "../styles/authStyle"; 
 
 export default function Dashboard({ onLogout }) {
   const [webGoatUrl, setWebGoatUrl] = useState("");
