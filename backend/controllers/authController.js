@@ -1,6 +1,6 @@
-import { hash, compare } from 'bcryptjs';
-import { sign } from 'jsonwebtoken';
-import { users } from '../config/database';
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { users } = require('../config/database');
 
 const registerUser = async (req, res) => {
     try {
@@ -12,6 +12,7 @@ const registerUser = async (req, res) => {
         if (users.find(u => u.email === email)) { 
             return res.status(400).json({ error: "User already exists." });
         }
+     
         const hashedPassword = await bcrypt.hash(password, 10);
         users.push({ email, password: hashedPassword }); 
         res.status(201).json({ message: "User registered successfully!" });
@@ -28,8 +29,9 @@ const loginUser = async (req, res) => {
     if (!user) return res.status(401).json({ error: genericError });
 
     try {
-        if (await compare(password, user.password)) {
-            const token = sign({ email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        if (await bcrypt.compare(password, user.password)) {
+          
+            const token = jwt.sign({ email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
             res.json({ token });
         } else {
             res.status(401).json({ error: genericError });
@@ -43,4 +45,4 @@ const getWebGoatLink = (req, res) => {
     res.json({ url: process.env.WEBGOAT_LESSON_URL });
 };
 
-export default { registerUser, loginUser, getWebGoatLink };
+module.exports = { registerUser, loginUser, getWebGoatLink };
