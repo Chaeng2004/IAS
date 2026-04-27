@@ -8,4 +8,4 @@ router.post('/login', loginUser);
 
 router.get('/webgoat-link', authenticateToken, getWebGoatLink);
 
-export default router;
+module.exports = router;
