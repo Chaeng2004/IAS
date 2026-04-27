@@ -2,12 +2,12 @@ import { useState } from "react";
 import { ShieldCheck, CheckCircle2, Sparkles } from "lucide-react";
 import Login from "./Auth/Login";
 import Register from "./Auth/Register";
-import SuccessView from "./shared/SuccessView";
-import { styles } from "./styles/authStyle";
+import Dashboard from "../src/Page/Dashboard";
+import { styles } from "../src/styles/authStyle";
 
 export default function App() {
   const [tab, setTab] = useState("login");
-  const [success, setSuccess] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   return (
     <div style={styles.root}>
@@ -21,8 +21,8 @@ export default function App() {
 
       <div style={styles.rightPanel} className="right-panel">
         <div style={styles.formCard}>
-          {success ? (
-            <SuccessView type={success} onBack={() => setSuccess(null)} />
+          {isAuthenticated ? (
+            <Dashboard onLogout={() => setIsAuthenticated(false)} />
           ) : (
             <>
               <div style={styles.tabRow}>
@@ -41,8 +41,8 @@ export default function App() {
               </div>
 
               {tab === "login"
-                ? <Login onSuccess={setSuccess} />
-                : <Register onSuccess={setSuccess} />
+                ? <Login onSuccess={() => setIsAuthenticated(true)} />
+                : <Register onSuccess={() => setIsAuthenticated(true)} />
               }
 
               <div style={styles.divider}>

@@ -29,11 +29,29 @@ export default function Register({ onSuccess }) {
   const strength = getPasswordStrength(form.password);
   const passwordsMatch = form.password.length > 0 && form.password === form.confirm;
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!form.email || strength.score < 2 || !passwordsMatch || !agreed) return; 
-    
     setLoading(true); 
-    setTimeout(() => { setLoading(false); onSuccess("register"); }, 1600); 
+
+    try {
+      const response = await fetch("http://localhost:5000/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email, password: form.password }) 
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        onSuccess(); 
+      } else {
+        alert(data.error || "Registration failed");
+      }
+    } catch (error) {
+      alert("Cannot connect to server.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
