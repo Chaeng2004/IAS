@@ -10,9 +10,7 @@ export default function Register({ onSuccess }) {
   const [form, setForm] = useState({ email: "", password: "", confirm: "", otp: "" }); 
   const [showPass, setShowPass] = useState(false); 
   const [showConfirm, setShowConfirm] = useState(false); 
-  const [agreed, setAgreed] = useState(false); 
   const [loading, setLoading] = useState(false); 
-  const [showSuccessModal, setShowSuccessModal] = useState(false); 
 
   const set = key => e => setForm(f => ({ ...f, [key]: e.target.value })); 
 
@@ -76,27 +74,11 @@ export default function Register({ onSuccess }) {
     if (error) {
       toast.error(error.message || "Invalid OTP"); 
     } else {
-      setShowSuccessModal(true); 
+      toast.success("Account Verified! Redirecting to login...");
+      setTimeout(() => {
+        onSuccess();
+      }, 2000); 
     }
-  }
-
-  if (showSuccessModal) {
-    return (
-      <div style={{ textAlign: "center", padding: "40px 20px" }}>
-        <ShieldCheck size={64} color="#52c41a" style={{ margin: "0 auto 16px" }} />
-        <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8, color: "#111" }}>Account Verified!</h2>
-        <p style={{ fontSize: 14, color: "#666", marginBottom: 24 }}>Your email has been successfully verified.</p>
-        <button
-          type="button"
-          style={{ width: "100%", padding: "12px", background: CRIMSON, color: "#fff", border: "none", borderRadius: 8, fontWeight: 600, cursor: "pointer" }}
-          onClick={onSuccess}
-          onMouseEnter={e => { e.target.style.background = CRIMSON_DARK; }} 
-          onMouseLeave={e => { e.target.style.background = CRIMSON; }}
-        >
-          Continue to Login
-        </button>
-      </div>
-    );
   }
 
   if (step === 2) {

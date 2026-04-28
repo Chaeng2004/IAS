@@ -2,20 +2,19 @@ import React, { useState } from "react";
 import { CheckCircle, XCircle } from "lucide-react";
 import { CRIMSON } from "../../styles/authStyle"; 
 
-export default function CiaQuiz({ onComplete, isCompleted }) {
+export default function CiaQuiz({ isCompleted, onComplete, answers, setAnswers }) {
   const [lessonError, setLessonError] = useState("");
-  const [quizAnswers, setQuizAnswers] = useState({ q1: "", q2: "", q3: "", q4: "" });
-
+  
   const handleOptionChange = (question, value) => {
-    setQuizAnswers({ ...quizAnswers, [question]: value });
+    setAnswers({ ...answers, [question]: value });
   };
 
   const handleSubmitLesson = () => {
     if (
-      quizAnswers.q1 === "Solution 3" &&
-      quizAnswers.q2 === "Solution 1" &&
-      quizAnswers.q3 === "Solution 4" &&
-      quizAnswers.q4 === "Solution 2"
+      answers.q1 === "Solution 3" &&
+      answers.q2 === "Solution 1" &&
+      answers.q3 === "Solution 4" &&
+      answers.q4 === "Solution 2"
     ) {
       setLessonError("");
       onComplete();
@@ -53,7 +52,7 @@ export default function CiaQuiz({ onComplete, isCompleted }) {
                 <div style={{ fontWeight: 600, fontSize: "15px", color: "#111", marginBottom: "12px" }}>{questions[index]}</div>
                 {optionsList[index].map((opt, i) => (
                   <label key={i} style={{ display: "flex", alignItems: "flex-start", gap: "10px", cursor: "pointer", padding: "8px", borderRadius: "6px", transition: "background 0.2s", fontSize: "14px", color: "#334155" }}>
-                    <input type="radio" name={qId} value={`Solution ${i+1}`} checked={quizAnswers[qId] === `Solution ${i+1}`} onChange={(e) => handleOptionChange(qId, e.target.value)} style={{ marginTop: "2px" }}/>
+                    <input type="radio" name={qId} value={`Solution ${i+1}`} checked={answers[qId] === `Solution ${i+1}`} onChange={(e) => handleOptionChange(qId, e.target.value)} style={{ marginTop: "2px" }}/>
                     Solution {i+1}: {opt}
                   </label>
                 ))}

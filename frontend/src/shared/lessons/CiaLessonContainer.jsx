@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ArrowRight } from "lucide-react";
 import CiaIntroduction from "./CiaIntroduction";
 import CiaConfidentiality from "./CiaConfidentiality";
@@ -7,9 +7,17 @@ import CiaAvailability from "./CiaAvailability";
 import CiaQuiz from "./CiaQuiz";
 import { CRIMSON } from "../../styles/authStyle";
 
-export default function CiaLessonContainer({ isCompleted, onComplete }) {
+export default function CiaLessonContainer({ isCompleted, onComplete, savedAnswers }) {
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = 5;
+
+  const [answers, setAnswers] = useState(savedAnswers || {});
+
+  useEffect(() => {
+    if (savedAnswers) {
+      setAnswers(savedAnswers);
+    }
+  }, [savedAnswers]);
 
   const renderPage = () => {
     switch (currentPage) {
@@ -17,7 +25,15 @@ export default function CiaLessonContainer({ isCompleted, onComplete }) {
       case 2: return <CiaConfidentiality />;
       case 3: return <CiaIntegrity />;
       case 4: return <CiaAvailability />;
-      case 5: return <CiaQuiz isCompleted={isCompleted} onComplete={onComplete} />;
+      case 5: 
+        return (
+          <CiaQuiz 
+            isCompleted={isCompleted} 
+            onComplete={() => onComplete(answers)} 
+            answers={answers}
+            setAnswers={setAnswers}
+          />
+        );
       default: return <CiaIntroduction />;
     }
   };

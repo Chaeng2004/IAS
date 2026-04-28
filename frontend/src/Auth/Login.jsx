@@ -59,7 +59,7 @@ export default function Login({ onSuccess }) {
         if (error) {
           toast.error(error.message); 
         } else {
-          toast.success("Reset code sent! Check your email.");
+          toast.success("If an account exists, a recovery code has been sent to your email.");
           setResetStep(2);
         }
         

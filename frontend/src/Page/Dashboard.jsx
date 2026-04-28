@@ -15,6 +15,7 @@ export default function Dashboard({ onLogout }) {
   const [userEmail, setUserEmail] = useState("");
 
   const [ciaCompleted, setCiaCompleted] = useState(false);
+  const [ciaAnswers, setCiaAnswers] = useState(null); 
 
   useEffect(() => {
     if (currentView === "dashboard") {
@@ -38,6 +39,10 @@ export default function Dashboard({ onLogout }) {
 
       if (session.user.user_metadata?.ciaCompleted) {
         setCiaCompleted(true);
+      }
+      
+      if (session.user.user_metadata?.ciaAnswers) {
+        setCiaAnswers(session.user.user_metadata.ciaAnswers);
       }
 
       try {
@@ -63,11 +68,15 @@ export default function Dashboard({ onLogout }) {
     fetchLink();
   }, []);
 
-  const handleCiaComplete = async () => {
+  const handleCiaComplete = async (answers) => {
     setCiaCompleted(true); 
+    if (answers) setCiaAnswers(answers); 
     
     const { error } = await supabase.auth.updateUser({
-      data: { ciaCompleted: true }
+      data: { 
+        ciaCompleted: true,
+        ciaAnswers: answers 
+      }
     });
 
     if (error) {
@@ -150,6 +159,7 @@ export default function Dashboard({ onLogout }) {
           <CiaLessonContainer 
             isCompleted={ciaCompleted} 
             onComplete={handleCiaComplete} 
+            savedAnswers={ciaAnswers}
           />
 
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
