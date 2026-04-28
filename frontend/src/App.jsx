@@ -51,7 +51,7 @@ export default function App() {
                 <div style={styles.dividerLine} />
               </div>
 
-              <p style={{ textAlign: "center", fontSize: 13, color: "#999", fontFamily: "'Georgia', serif" }}>
+              <p style={{ textAlign: "center", fontSize: 13, color: "#999", fontFamily: "'Montserrat', Sans-Serif" }}>
                 {tab === "login" ? "Don't have an account? " : "Already have an account? "}
                 <button
                   style={{ ...styles.forgotLink, fontWeight: 600 }}

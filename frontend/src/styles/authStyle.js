@@ -8,7 +8,7 @@ export const styles = {
         minHeight: "100vh", 
         background: `#fff`, 
         display: "flex", 
-        fontFamily: "'Georgia', serif", 
+        fontFamily: "'Montserrat', Sans-Serif",
         margin: 0, 
         padding: 0 
     },
@@ -56,7 +56,7 @@ export const styles = {
         fontSize: 18, 
         fontWeight: 600, 
         letterSpacing: "0.04em", 
-        fontFamily: "'Georgia', serif" 
+        fontFamily: "'Montserrat', Sans-Serif" 
     },
   headline: { 
         color: "#fff", 
@@ -138,7 +138,7 @@ export const styles = {
         color: "#aaa", 
         textAlign: "center", 
         transition: "color 0.2s", 
-        fontFamily: "'Georgia', serif" 
+        fontFamily: "'Montserrat', Sans-Serif" 
     },
   tabActive: { 
         color: CRIMSON, 
@@ -151,7 +151,7 @@ export const styles = {
         color: "#1a1a1a", 
         marginBottom: 6, 
         letterSpacing: "-0.01em", 
-        fontFamily: "'Georgia', serif" 
+        fontFamily: "'Montserrat', Sans-Serif" 
     },
   subheading: { 
         fontSize: 14, 
@@ -170,7 +170,7 @@ export const styles = {
         marginBottom: 7, 
         letterSpacing: "0.06em", 
         textTransform: "uppercase", 
-        fontFamily: "'Georgia', serif" 
+        fontFamily: "'Montserrat', Sans-Serif" 
     },
   inputWrap: { 
         position: "relative", 
@@ -196,7 +196,7 @@ export const styles = {
         outline: "none", 
         transition: "border 0.2s, background 0.2s", 
         boxSizing: "border-box", 
-        fontFamily: "'Georgia', serif" 
+        fontFamily: "'Montserrat', Sans-Serif",
     },
   eyeBtn: { 
         position: "absolute", 
@@ -232,7 +232,7 @@ export const styles = {
         letterSpacing: "0.04em", 
         transition: "background 0.2s, transform 0.1s", 
         marginTop: 8, 
-        fontFamily: "'Georgia', serif" 
+        fontFamily: "'Montserrat', Sans-Serif" 
     },
   divider: { 
         display: "flex", 
@@ -249,14 +249,14 @@ export const styles = {
         fontSize: 12, 
         color: "#bbb", 
         letterSpacing: "0.05em", 
-        fontFamily: "'Georgia', serif" 
+        fontFamily: "'Montserrat', Sans-Serif" 
     },
   forgotLink: { 
         fontSize: 13, 
         color: CRIMSON, 
         textDecoration: "none", 
         cursor: "pointer", 
-        fontFamily: "'Georgia', serif", 
+        fontFamily: "'Montserrat', Sans-Serif", 
         background: "none", 
         border: "none", 
         padding: 0 
@@ -275,20 +275,20 @@ export const styles = {
   checkLabel: { 
         fontSize: 13, 
         color: "#666", 
-        fontFamily: "'Georgia', serif" 
+        fontFamily: "'Montserrat', Sans-Serif" 
     },
   terms: { 
         marginBottom: 20, 
         fontSize: 13, 
         color: "#888", 
         lineHeight: 1.6, 
-        fontFamily: "'Georgia', serif" 
+        fontFamily: "'Montserrat', Sans-Serif" 
     },
   termsLink: { 
         color: CRIMSON, 
         cursor: "pointer", 
         textDecoration: "underline", 
-        fontFamily: "'Georgia', serif" 
+        fontFamily: "'Montserrat', Sans-Serif" 
     },
   successBox: { 
         textAlign: "center", 
@@ -309,13 +309,13 @@ export const styles = {
         fontWeight: 700, 
         color: "#1a1a1a", 
         marginBottom: 8, 
-        fontFamily: "'Georgia', serif" 
+        fontFamily: "'Montserrat', Sans-Serif" 
     },
   successSub: { 
         fontSize: 14, 
         color: "#888", 
         marginBottom: 28, 
         lineHeight: 1.6, 
-        fontFamily: "'Georgia', serif" 
+        fontFamily: "'Montserrat', Sans-Serif" 
     }
 };

@@ -14,8 +14,10 @@ export default function Login({ onSuccess }) {
   
   // Password Reset States
   const [isResetMode, setIsResetMode] = useState(false);
-  const [resetStep, setResetStep] = useState(1); // 1 = input email, 2 = input code
+  const [resetStep, setResetStep] = useState(1); // 1 = Email, 2 = Code, 3 = New Password
   const [resetCode, setResetCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   async function handleSubmit() {
     setLoading(true);
@@ -23,6 +25,7 @@ export default function Login({ onSuccess }) {
     if (isResetMode) {
       // --- FORGOT PASSWORD FLOW ---
       if (resetStep === 1) {
+        // STEP 1: Send the Code
         if (!email) {
           toast.error("Please enter your email.");
           setLoading(false);
@@ -35,10 +38,11 @@ export default function Login({ onSuccess }) {
           toast.error(error.message); 
         } else {
           toast.success("Reset code sent! Check your email.");
-          setResetStep(2); // Move to the verification code input
+          setResetStep(2);
         }
-      } else {
-        // Step 2: Verify the 8-digit code
+        
+      } else if (resetStep === 2) {
+        // STEP 2: Verify the Code
         if (!resetCode || resetCode.length !== 8) {
           toast.error("Please enter the 8-digit code.");
           setLoading(false);
@@ -48,17 +52,41 @@ export default function Login({ onSuccess }) {
         const { error } = await supabase.auth.verifyOtp({
           email,
           token: resetCode,
-          type: 'recovery' // Tells Supabase this code is for a password reset
+          type: 'recovery' 
         });
         
         if (error) {
           toast.error(error.message);
         } else {
-          toast.success("Identity verified! You can now change your password in your profile.");
-          // Add a tiny delay to let the user read the success toast
+          toast.success("Code verified! Please set your new password.");
+          setResetStep(3); // Move to the New Password step
+        }
+        
+      } else if (resetStep === 3) {
+        // STEP 3: Set New Password
+        if (!newPassword || newPassword.length < 8) {
+          toast.error("Password must be at least 8 characters.");
+          setLoading(false);
+          return;
+        }
+        if (newPassword !== confirmPassword) {
+          toast.error("Passwords do not match.");
+          setLoading(false);
+          return;
+        }
+
+        // Because Step 2 verified the OTP, Supabase established a secure session in the background.
+        // We can now safely call updateUser to set the new password!
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+        if (error) {
+          toast.error(error.message);
+        } else {
+          toast.success("Password updated successfully!");
+          // Small delay before dropping them into the dashboard
           setTimeout(() => {
             onSuccess(); 
-          }, 800);
+          }, 1000);
         }
       }
       
@@ -89,31 +117,63 @@ export default function Login({ onSuccess }) {
     <>
       <Toaster position="top-center" reverseOrder={false} />
 
-      {/* Dynamic Headers based on Mode and Step */}
+      {/* Dynamic Headers */}
       <h2 style={styles.heading}>
-        {isResetMode ? (resetStep === 1 ? "Reset Password" : "Enter Reset Code") : "Welcome back"}
+        {isResetMode 
+          ? (resetStep === 1 ? "Reset Password" : resetStep === 2 ? "Enter Reset Code" : "Set New Password") 
+          : "Welcome back"}
       </h2>
       <p style={styles.subheading}>
         {isResetMode 
-          ? (resetStep === 1 ? "Enter your email to receive an 8-digit recovery code." : "Enter the 8-digit code sent to your email.") 
+          ? (resetStep === 1 ? "Enter your email to receive an 8-digit recovery code." 
+             : resetStep === 2 ? "Enter the 8-digit code sent to your email."
+             : "Please create a new, secure password.") 
           : "Sign in to your account to continue."}
       </p>
 
-      {/* Show the Code input on Step 2, otherwise show the Email input */}
-      {isResetMode && resetStep === 2 ? (
-        <InputField 
-          label="Verification Code" 
-          icon={<Lock size={16} />} 
-          type="text"
-          placeholder="Enter 8-digit code" 
-          value={resetCode} 
-          onChange={e => setResetCode(e.target.value)} 
-        />
+      {/* Dynamic Form Inputs */}
+      {isResetMode ? (
+        resetStep === 1 ? (
+          <InputField label="Email Address" icon={<Mail size={16} />} type="email" placeholder="you@gmail.com" value={email} onChange={e => setEmail(e.target.value)} />
+        ) : resetStep === 2 ? (
+          <InputField label="Verification Code" icon={<Lock size={16} />} type="text" placeholder="Enter 8-digit code" value={resetCode} onChange={e => setResetCode(e.target.value)} />
+        ) : (
+          <>
+            {/* Step 3 UI: New Password Fields */}
+            <div style={styles.fieldGroup}>
+              <div style={styles.inlineRow}><label style={{ ...styles.label, marginBottom: 0 }}>New Password</label></div>
+              <div style={styles.inputWrap}>
+                <span style={styles.inputIcon}><Lock size={16} /></span>
+                <input
+                  type={showPass ? "text" : "password"} placeholder="••••••••" value={newPassword} onChange={e => setNewPassword(e.target.value)} style={styles.input}
+                  onFocus={e => { e.target.style.borderColor = CRIMSON; e.target.style.background = "#fff"; }}
+                  onBlur={e => { e.target.style.borderColor = "#e5e5e5"; e.target.style.background = "#fafafa"; }}
+                />
+                <button style={styles.eyeBtn} onClick={() => setShowPass(v => !v)}>
+                  {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
+            </div>
+
+            <div style={styles.fieldGroup}>
+              <div style={styles.inlineRow}><label style={{ ...styles.label, marginBottom: 0 }}>Confirm Password</label></div>
+              <div style={styles.inputWrap}>
+                <span style={styles.inputIcon}><Lock size={16} /></span>
+                <input
+                  type={showPass ? "text" : "password"} placeholder="••••••••" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} style={styles.input}
+                  onFocus={e => { e.target.style.borderColor = CRIMSON; e.target.style.background = "#fff"; }}
+                  onBlur={e => { e.target.style.borderColor = "#e5e5e5"; e.target.style.background = "#fafafa"; }}
+                />
+              </div>
+            </div>
+          </>
+        )
       ) : (
+        // Normal Login Email Field
         <InputField label="Email Address" icon={<Mail size={16} />} type="email" placeholder="you@gmail.com" value={email} onChange={e => setEmail(e.target.value)} />
       )}
 
-      {/* Only show the password field during a normal login */}
+      {/* Normal Login Password Field */}
       {!isResetMode && (
         <div style={styles.fieldGroup}>
           <div style={styles.inlineRow}>
@@ -142,18 +202,22 @@ export default function Login({ onSuccess }) {
         onMouseEnter={e => { e.target.style.background = CRIMSON_DARK; }} onMouseLeave={e => { e.target.style.background = CRIMSON; }}
       >
         {loading ? "Processing…" : <>
-          {isResetMode ? (resetStep === 1 ? "Send Reset Code" : "Verify Code") : "Sign In"} 
+          {isResetMode 
+            ? (resetStep === 1 ? "Send Reset Code" : resetStep === 2 ? "Verify Code" : "Update Password") 
+            : "Sign In"} 
           <ArrowRight size={16} />
         </>}
       </button>
 
-      {/* Go Back button during Reset Mode */}
+      {/* Go Back / Cancel Button */}
       {isResetMode && (
         <button 
             onClick={() => {
               setIsResetMode(false);
-              setResetStep(1); // Reset the step in case they come back later
-              setResetCode(""); // Clear out any typed code
+              setResetStep(1); 
+              setResetCode(""); 
+              setNewPassword("");
+              setConfirmPassword("");
             }}
             style={{ background: "none", border: "none", color: CRIMSON, width: "100%", marginTop: "16px", fontWeight: "600", cursor: "pointer" }}
         >
