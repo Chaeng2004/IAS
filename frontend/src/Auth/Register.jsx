@@ -186,10 +186,6 @@ export default function Register({ onSuccess }) {
         </div>
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 24 }}> 
-        <input type="checkbox" id="terms" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={{ cursor: "pointer" }} /> 
-      </div> 
-
       <button
         style={{ width: "100%", padding: "12px", background: CRIMSON, color: "#fff", border: "none", borderRadius: 8, fontWeight: 600, cursor: "pointer", opacity: loading || strength.score < 2 || !passwordsMatch || !agreed ? 0.6 : 1, transition: "background 0.2s" }} 
         onClick={handleRegisterSubmit} 
