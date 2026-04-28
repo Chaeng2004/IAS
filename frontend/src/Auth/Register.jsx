@@ -48,7 +48,7 @@ export default function Register({ onSuccess }) {
 
   // 2. Verify Supabase OTP
   async function handleOTPSubmit() {
-    if (!form.otp || form.otp.length !== 6) return;
+    if (!form.otp || form.otp.length !== 8) return;
     setLoading(true);
 
     const { error } = await supabase.auth.verifyOtp({
