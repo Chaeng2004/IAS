@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ShieldCheck, CheckCircle2, Sparkles } from "lucide-react";
 import Login from "./Auth/Login";
 import Register from "./Auth/Register";
@@ -8,6 +8,16 @@ import { styles } from "../src/styles/authStyle";
 export default function App() {
   const [tab, setTab] = useState("login");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      document.title = "Dashboard | IAS";
+    } else if (tab === "login") {
+      document.title = "Sign In | IAS";
+    } else if (tab === "register") {
+      document.title = "Register | IAS";
+    }
+  }, [tab, isAuthenticated]);
 
   return (
     <div style={styles.root}>
