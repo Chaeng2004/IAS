@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { LogOut, ExternalLink, ShieldAlert, CheckCircle, Info, User, AlertTriangle, XCircle } from "lucide-react";
+import { LogOut, ExternalLink, ShieldAlert, CheckCircle, Info, User, AlertTriangle } from "lucide-react";
 import { CRIMSON, CRIMSON_DARK } from "../styles/authStyle"; 
 import { supabase } from "../supabase"; 
 import Profile from "./Profile"; 
+import CiaLessonContainer from "../shared/lessons/CiaLessonContainer";
 
 export default function Dashboard({ onLogout }) {
   const [webGoatUrl, setWebGoatUrl] = useState("");
@@ -13,14 +14,8 @@ export default function Dashboard({ onLogout }) {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [userEmail, setUserEmail] = useState("");
 
+  // CIA Triad Lesson State
   const [ciaCompleted, setCiaCompleted] = useState(false);
-  const [lessonError, setLessonError] = useState("");
-  const [ciaAnswers, setCiaAnswers] = useState({
-    confidentiality: false,
-    integrity: false,
-    accountability: false,
-    availability: false,
-  });
 
   useEffect(() => {
     if (currentView === "dashboard") {
@@ -70,32 +65,12 @@ export default function Dashboard({ onLogout }) {
     onLogout();
   };
 
-  const handleCheckboxChange = (e) => {
-    setCiaAnswers({
-      ...ciaAnswers,
-      [e.target.name]: e.target.checked
-    });
-  };
-
-  const handleSubmitLesson = () => {
-    // Correct answers: Confidentiality, Integrity, Availability. Incorrect: Accountability.
-    if (ciaAnswers.confidentiality && ciaAnswers.integrity && ciaAnswers.availability && !ciaAnswers.accountability) {
-      setCiaCompleted(true);
-      setLessonError("");
-    } else {
-      setLessonError("Incorrect. Please select only the three core principles of the CIA Triad.");
-    }
-  };
-
   return (
     <div style={{ padding: "40px 5%", maxWidth: "1000px", margin: "0 auto", fontFamily: "sans-serif" }}>
       
       <style>{`
         .dash-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; gap: 16px; flex-wrap: wrap; }
         .dash-actions { display: flex; gap: 12px; }
-        .lesson-checkbox { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 8px; border-radius: 6px; transition: background 0.2s; }
-        .lesson-checkbox:hover { background: #e2e8f0; }
-        .lesson-checkbox input { cursor: pointer; width: 16px; height: 16px; }
         
         @media (max-width: 600px) {
           .dash-header { flex-direction: column; }
@@ -157,54 +132,11 @@ export default function Dashboard({ onLogout }) {
             The CIA Triad is a foundational model in information security designed to guide policies for security within an organization. Complete the interactive assignment below to validate your understanding.
           </p>
 
-          {/* Interactive Lesson Container */}
-          <div style={{ padding: "20px", background: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "8px", marginBottom: "24px" }}>
-            <h3 style={{ marginTop: 0, fontSize: "16px", color: "#0f172a" }}>Assignment: Identify the Principles</h3>
-            <p style={{ color: "#475569", fontSize: "14px", marginBottom: "16px" }}>
-              Select the three core concepts that make up the CIA Triad from the list below:
-            </p>
-            
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginBottom: "20px" }}>
-              <label className="lesson-checkbox" style={{ opacity: ciaCompleted ? 0.6 : 1, pointerEvents: ciaCompleted ? "none" : "auto" }}>
-                <input type="checkbox" name="confidentiality" checked={ciaAnswers.confidentiality} onChange={handleCheckboxChange} />
-                <span style={{ color: "#334155" }}>Confidentiality</span>
-              </label>
-              <label className="lesson-checkbox" style={{ opacity: ciaCompleted ? 0.6 : 1, pointerEvents: ciaCompleted ? "none" : "auto" }}>
-                <input type="checkbox" name="integrity" checked={ciaAnswers.integrity} onChange={handleCheckboxChange} />
-                <span style={{ color: "#334155" }}>Integrity</span>
-              </label>
-              <label className="lesson-checkbox" style={{ opacity: ciaCompleted ? 0.6 : 1, pointerEvents: ciaCompleted ? "none" : "auto" }}>
-                <input type="checkbox" name="accountability" checked={ciaAnswers.accountability} onChange={handleCheckboxChange} />
-                <span style={{ color: "#334155" }}>Accountability</span>
-              </label>
-              <label className="lesson-checkbox" style={{ opacity: ciaCompleted ? 0.6 : 1, pointerEvents: ciaCompleted ? "none" : "auto" }}>
-                <input type="checkbox" name="availability" checked={ciaAnswers.availability} onChange={handleCheckboxChange} />
-                <span style={{ color: "#334155" }}>Availability</span>
-              </label>
-            </div>
-
-            {!ciaCompleted ? (
-              <div>
-                <button 
-                  onClick={handleSubmitLesson}
-                  style={{ padding: "10px 20px", background: "#2563eb", color: "#fff", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: "600", transition: "background 0.2s" }}
-                  onMouseEnter={e => e.target.style.background = "#1d4ed8"}
-                  onMouseLeave={e => e.target.style.background = "#2563eb"}
-                >
-                  Submit Answers
-                </button>
-                {lessonError && (
-                  <p style={{ color: CRIMSON, fontSize: "14px", marginTop: "12px", display: "flex", alignItems: "center", gap: "6px" }}>
-                    <XCircle size={16} /> {lessonError}
-                  </p>
-                )}
-              </div>
-            ) : (
-              <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "12px 16px", background: "#dcfce7", color: "#166534", borderRadius: "6px", fontWeight: "600", border: "1px solid #bbf7d0" }}>
-                <CheckCircle size={20} /> Lesson Successfully Completed! You mastered the CIA Triad.
-              </div>
-            )}
-          </div>
+          {/* Modularized Lesson Container */}
+          <CiaLessonContainer 
+            isCompleted={ciaCompleted} 
+            onComplete={() => setCiaCompleted(true)} 
+          />
 
           {/* Secure Link Section */}
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
