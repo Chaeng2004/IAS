@@ -73,12 +73,12 @@ export default function Register({ onSuccess }) {
       <div style={{ textAlign: "center" }}>
         <ShieldCheck size={48} color={CRIMSON} style={{ margin: "0 auto 16px" }} />
         <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8, color: "#111" }}>Check your email</h2>
-        <p style={{ fontSize: 14, color: "#666", marginBottom: 24 }}>We sent a 6-digit code to <strong>{form.email}</strong>.</p>
+        <p style={{ fontSize: 14, color: "#666", marginBottom: 24 }}>We sent a 8-digit code to <strong>{form.email}</strong>.</p>
         
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <input
             type="text"
-            maxLength="6"
+            maxLength="8"
             placeholder="••••••"
             value={form.otp}
             onChange={set("otp")}
