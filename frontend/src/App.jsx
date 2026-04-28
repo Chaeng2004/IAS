@@ -19,8 +19,8 @@ export default function App() {
     }
   }, [tab, isAuthenticated]);
 
-  return (
-    <div style={styles.root}>
+ return (
+    <>
       <style>{`
         * { box-sizing: border-box; margin: 0; padding: 0; }
         @media (max-width: 768px) {
@@ -29,12 +29,12 @@ export default function App() {
         }
       `}</style>
 
-      <div style={styles.rightPanel} className="right-panel">
-        <div style={styles.formCard}>
-          {isAuthenticated ? (
-            <Dashboard onLogout={() => setIsAuthenticated(false)} />
-          ) : (
-            <>
+      {isAuthenticated ? (
+        <Dashboard onLogout={() => setIsAuthenticated(false)} />
+      ) : (
+        <div style={styles.root}>
+          <div style={styles.rightPanel} className="right-panel">
+            <div style={styles.formCard}>
               <div style={styles.tabRow}>
                 <button
                   style={{ ...styles.tab, ...(tab === "login" ? styles.tabActive : {}) }}
@@ -70,10 +70,10 @@ export default function App() {
                   {tab === "login" ? "Create one now" : "Sign in here"}
                 </button>
               </p>
-            </>
-          )}
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 }

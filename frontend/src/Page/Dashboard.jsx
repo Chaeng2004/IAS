@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { LogOut, ExternalLink, ShieldAlert, CheckCircle, Info, User, AlertTriangle } from "lucide-react";
 import { CRIMSON, CRIMSON_DARK } from "../styles/authStyle"; 
 import webgoatProof from "../assets/webgoat-proof.jpg"; 
-import { supabase } from "../supabase"; // Import Supabase
+import { supabase } from "../supabase"; 
+import Profile from "./Profile"; 
 
 export default function Dashboard({ onLogout }) {
   const [webGoatUrl, setWebGoatUrl] = useState("");
@@ -14,8 +15,15 @@ export default function Dashboard({ onLogout }) {
   const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
+    if (currentView === "dashboard") {
+      document.title = "Dashboard | IAS";
+    } else if (currentView === "profile") {
+      document.title = "Profile | IAS";
+    }
+  }, [currentView]);
+
+  useEffect(() => {
     const fetchLink = async () => {
-      // 1. Get the secure session directly from Supabase
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (!session || sessionError) {
@@ -26,11 +34,10 @@ export default function Dashboard({ onLogout }) {
 
       setUserEmail(session.user.email);
 
-      // 2. Fetch the WebGoat link from your Backend using the Supabase token
       try {
         const API_URL = import.meta.env.VITE_API_URL;
         const response = await fetch(`${API_URL}/api/webgoat-link`, {
-          headers: { "Authorization": session.access_token } // Use Supabase token!
+          headers: { "Authorization": session.access_token } 
         });
         
         const data = await response.json();
@@ -51,14 +58,25 @@ export default function Dashboard({ onLogout }) {
   }, []);
 
   const confirmLogout = async () => {
-    await supabase.auth.signOut(); // Securely destroys session on the server
+    await supabase.auth.signOut(); 
     onLogout();
   };
 
   return (
-    <div style={{ padding: "40px 20px", maxWidth: "800px", margin: "0 auto", fontFamily: "sans-serif" }}>
+    <div style={{ padding: "40px 5%", maxWidth: "1000px", margin: "0 auto", fontFamily: "sans-serif" }}>
       
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
+      <style>{`
+        .dash-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; gap: 16px; flex-wrap: wrap; }
+        .dash-actions { display: flex; gap: 12px; }
+        
+        @media (max-width: 600px) {
+          .dash-header { flex-direction: column; }
+          .dash-actions { width: 100%; }
+          .dash-actions button { flex: 1; justify-content: center; }
+        }
+      `}</style>
+
+      <div className="dash-header">
         <div>
           <h1 style={{ fontSize: "24px", color: "#111" }}>
             {currentView === "dashboard" ? "Security Dashboard" : "User Profile"}
@@ -67,7 +85,7 @@ export default function Dashboard({ onLogout }) {
             {currentView === "dashboard" ? "Welcome to your protected workspace." : "Manage your account details."}
           </p>
         </div>
-        <div style={{ display: "flex", gap: "12px" }}>
+        <div className="dash-actions">
           <button 
             onClick={() => setCurrentView(currentView === "dashboard" ? "profile" : "dashboard")}
             style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px 16px", background: "#f8fafc", color: "#334155", border: "1px solid #cbd5e1", borderRadius: "6px", cursor: "pointer", fontWeight: "600" }}
@@ -85,7 +103,6 @@ export default function Dashboard({ onLogout }) {
       </div>
 
       {currentView === "dashboard" ? (
-        
         <div style={{ background: "#fff", border: "1px solid #e5e5e5", borderRadius: "12px", padding: "24px", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
             <div style={{ background: "#fef2f2", padding: "10px", borderRadius: "8px", color: CRIMSON }}>
@@ -136,30 +153,12 @@ export default function Dashboard({ onLogout }) {
           </div>
         </div>
       ) : (
-       
-        <div style={{ background: "#fff", border: "1px solid #e5e5e5", borderRadius: "12px", padding: "32px", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)", textAlign: "center" }}>
-          <div style={{ width: "80px", height: "80px", background: "#f1f5f9", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", border: "2px solid #e2e8f0" }}>
-            <User size={40} color="#64748b" />
-          </div>
-          <h2 style={{ fontSize: "20px", color: "#111", marginBottom: "4px" }}>Verified Security User</h2>
-          <p style={{ color: "#666", marginBottom: "24px" }}>{userEmail}</p>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", textAlign: "left", background: "#f8fafc", padding: "20px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-            <div>
-              <p style={{ fontSize: "12px", color: "#64748b", textTransform: "uppercase", fontWeight: "700", marginBottom: "4px" }}>Account Status</p>
-              <p style={{ fontSize: "15px", color: "#16a34a", fontWeight: "600", display: "flex", alignItems: "center", gap: "6px" }}><CheckCircle size={14}/> Active & Verified</p>
-            </div>
-            <div>
-              <p style={{ fontSize: "12px", color: "#64748b", textTransform: "uppercase", fontWeight: "700", marginBottom: "4px" }}>Clearance Level</p>
-              <p style={{ fontSize: "15px", color: "#111", fontWeight: "500" }}>Student Assessor</p>
-            </div>
-          </div>
-        </div>
+        <Profile userEmail={userEmail} />
       )}
 
       {showLogoutModal && (
-        <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50 }}>
-          <div style={{ background: "#fff", padding: "24px", borderRadius: "12px", width: "90%", maxWidth: "400px", boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)" }}>
+        <div style={{ position: "fixed", top: 0, left: 0, width: "100%", height: "100%", background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50, padding: "20px" }}>
+          <div style={{ background: "#fff", padding: "24px", borderRadius: "12px", width: "100%", maxWidth: "400px", boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
               <div style={{ background: "#fef2f2", padding: "8px", borderRadius: "50%", color: CRIMSON }}>
                 <AlertTriangle size={24} />
