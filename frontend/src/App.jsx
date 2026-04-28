@@ -30,7 +30,10 @@ export default function App() {
       `}</style>
 
       {isAuthenticated ? (
-        <Dashboard onLogout={() => setIsAuthenticated(false)} />
+        <Dashboard onLogout={() => {
+          setIsAuthenticated(false);
+          setTab("login");
+        }} />
       ) : (
         <div style={styles.root}>
           <div style={styles.rightPanel} className="right-panel">
