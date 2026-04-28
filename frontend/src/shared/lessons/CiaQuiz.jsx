@@ -34,7 +34,6 @@ export default function CiaQuiz({ onComplete, isCompleted }) {
       </p>
       
       <div style={{ opacity: isCompleted ? 0.7 : 1, pointerEvents: isCompleted ? "none" : "auto" }}>
-        {/* Render questions (truncated here for brevity, use the exact questions from the previous step) */}
         {['q1', 'q2', 'q3', 'q4'].map((qId, index) => {
            const questions = [
              "1. How could an intruder harm the security goal of confidentiality?",

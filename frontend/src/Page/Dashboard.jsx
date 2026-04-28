@@ -14,7 +14,6 @@ export default function Dashboard({ onLogout }) {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [userEmail, setUserEmail] = useState("");
 
-  // CIA Triad Lesson State
   const [ciaCompleted, setCiaCompleted] = useState(false);
 
   useEffect(() => {
@@ -51,7 +50,7 @@ export default function Dashboard({ onLogout }) {
           setError("Failed to load security module link.");
         }
       } catch (err) {
-        setError("Cannot connect to server.");
+        setError("Cannot connect to WebGoat server.");
       } finally {
         setLoading(false);
       }
@@ -82,10 +81,10 @@ export default function Dashboard({ onLogout }) {
       <div className="dash-header">
         <div>
           <h1 style={{ fontSize: "24px", color: "#111" }}>
-            {currentView === "dashboard" ? "Security Dashboard" : "User Profile"}
+            {currentView === "dashboard" ? "WebGoat Dashboard" : "User Profile"}
           </h1>
           <p style={{ color: "#666", marginTop: "4px" }}>
-            {currentView === "dashboard" ? "Welcome to your protected workspace." : "View your account details."}
+            {currentView === "dashboard" ? "Welcome to your mini webgoat workspace." : "View your account details."}
           </p>
         </div>
         <div className="dash-actions">
@@ -132,13 +131,11 @@ export default function Dashboard({ onLogout }) {
             The CIA Triad is a foundational model in information security designed to guide policies for security within an organization. Complete the interactive assignment below to validate your understanding.
           </p>
 
-          {/* Modularized Lesson Container */}
           <CiaLessonContainer 
             isCompleted={ciaCompleted} 
             onComplete={() => setCiaCompleted(true)} 
           />
 
-          {/* Secure Link Section */}
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {loading ? (
               <p style={{ color: "#666" }}>Decrypting secure link...</p>
@@ -161,7 +158,8 @@ export default function Dashboard({ onLogout }) {
               <p style={{ fontSize: "13px", color: "#334155", display: "flex", alignItems: "flex-start", gap: "8px", margin: 0, lineHeight: "1.5" }}>
                 <Info size={16} style={{ color: "#3b82f6", flexShrink: 0, marginTop: "2px" }} />
                 <span>
-                  <strong>Instructor Note:</strong> Because WebGoat is an intentionally vulnerable application, it is hosted securely via a local WSL environment rather than exposed to the public internet, adhering to standard cybersecurity best practices. Use the dashboard to track your progress and access the secure tunnel.
+                  <strong>Warning Note:</strong> Because WebGoat is an intentionally vulnerable application, it is hosted securely via a local WSL environment rather than exposed to the public internet, adhering to standard cybersecurity best practices. 
+                  We instead display a similar WebGoat Lesson Integration where you can answer all the questions based on the lesson presented and track your progress task status as same as in the WebGoat site.
                 </span>
               </p>
             </div>

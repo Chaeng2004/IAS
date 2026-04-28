@@ -25,7 +25,6 @@ export default function CiaLessonContainer({ isCompleted, onComplete }) {
   return (
     <div style={{ background: "#f8fafc", border: "1px solid #cbd5e1", borderRadius: "8px", padding: "24px", marginBottom: "24px" }}>
       
-      {/* Pagination Controls */}
       <div style={{ display: "flex", gap: "8px", marginBottom: "24px", alignItems: "center", borderBottom: "1px solid #e2e8f0", paddingBottom: "16px" }}>
         {[1, 2, 3, 4, 5].map((page) => (
           <button
@@ -48,7 +47,6 @@ export default function CiaLessonContainer({ isCompleted, onComplete }) {
         )}
       </div>
 
-      {/* Lesson Content Area */}
       <div style={{ minHeight: "300px" }}>
         {renderPage()}
       </div>
