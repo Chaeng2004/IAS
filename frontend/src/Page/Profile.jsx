@@ -25,7 +25,7 @@ export default function Profile({ userEmail }) {
         </div>
 
         <div style={{ flex: 1 }}>
-          <h2 style={{ fontSize: "24px", color: "#111", marginBottom: "4px" }}>Verified Security User</h2>
+          <h2 style={{ fontSize: "24px", color: "#111", marginBottom: "4px" }}>Verified Protected User</h2>
           <p style={{ color: "#666", fontSize: "16px" }}>{userEmail}</p>
 
           <div className="profile-stats-grid">
@@ -38,8 +38,8 @@ export default function Profile({ userEmail }) {
             
             <div className="stat-box">
               <p style={{ fontSize: "12px", color: "#64748b", textTransform: "uppercase", fontWeight: "700", marginBottom: "6px" }}>Clearance Level</p>
-              <p style={{ fontSize: "16px", color: "#111", fontWeight: "600" }}>Student Assessor</p>
-            </div>
+              <p style={{ fontSize: "16px", color: "#111", fontWeight: "600" }}>Student</p>
+            </div> 
           </div>
         </div>
 
