@@ -43,7 +43,7 @@ export default function Register({ onSuccess }) {
   const passwordsMatch = form.password.length > 0 && form.password === form.confirm;
 
   async function handleRegisterSubmit() {
-    if (!form.email || strength.score < 2 || !passwordsMatch || !agreed) return; 
+    if (!form.email || strength.score < 2 || !passwordsMatch) return; 
     setLoading(true); 
 
     const { error } = await supabase.auth.signUp({
