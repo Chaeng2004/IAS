@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck } from "lucide-react"; 
+import { Mail, Lock, Eye, EyeOff, ShieldCheck } from "lucide-react"; 
 import { CRIMSON, CRIMSON_DARK } from "../styles/authStyle"; 
 import InputField from "../shared/InputField"; 
-import { supabase } from "../supabase"; // Import Supabase
+import { supabase } from "../supabase"; 
+import toast, { Toaster } from 'react-hot-toast'; 
 
 export default function Register({ onSuccess }) {
   const [step, setStep] = useState(1); 
@@ -11,23 +12,36 @@ export default function Register({ onSuccess }) {
   const [showConfirm, setShowConfirm] = useState(false); 
   const [agreed, setAgreed] = useState(false); 
   const [loading, setLoading] = useState(false); 
+  const [showSuccessModal, setShowSuccessModal] = useState(false); 
 
   const set = key => e => setForm(f => ({ ...f, [key]: e.target.value })); 
 
   const getPasswordStrength = (pass) => {
     let score = 0;
-    if (!pass) return { score: 0, width: "0%" };
+    if (!pass) return { score: 0, width: "0%", color: "transparent", label: "" };
     if (pass.length >= 8) score += 1;
     if (/[A-Z]/.test(pass)) score += 1;
     if (/[0-9]/.test(pass)) score += 1;
     if (/[^A-Za-z0-9]/.test(pass)) score += 1; 
-    return { score }; 
+
+    let width = "0%";
+    let color = "transparent";
+    let label = "";
+
+    if (score <= 1) { 
+      width = "33%"; color = "#ff4d4f"; label = "Weak"; 
+    } else if (score === 2) { 
+      width = "66%"; color = "#faad14"; label = "Medium"; 
+    } else if (score >= 3) { 
+      width = "100%"; color = "#52c41a"; label = "Strong"; 
+    }
+
+    return { score, width, color, label }; 
   };
 
   const strength = getPasswordStrength(form.password);
   const passwordsMatch = form.password.length > 0 && form.password === form.confirm;
 
-  // 1. Send Registration to Supabase
   async function handleRegisterSubmit() {
     if (!form.email || strength.score < 2 || !passwordsMatch || !agreed) return; 
     setLoading(true); 
@@ -40,13 +54,13 @@ export default function Register({ onSuccess }) {
     setLoading(false);
 
     if (error) {
-      alert(error.message);
+      toast.error(error.message); 
     } else {
-      setStep(2); // Move to OTP screen
+      toast.success("Registration successful! Check your email for the OTP.");
+      setStep(2); 
     }
   }
 
-  // 2. Verify Supabase OTP
   async function handleOTPSubmit() {
     if (!form.otp || form.otp.length !== 8) return;
     setLoading(true);
@@ -54,51 +68,74 @@ export default function Register({ onSuccess }) {
     const { error } = await supabase.auth.verifyOtp({
       email: form.email,
       token: form.otp,
-      type: 'signup' // Tells Supabase this is a new account verification
+      type: 'signup' 
     });
 
     setLoading(false);
 
     if (error) {
-      alert(error.message || "Invalid OTP");
+      toast.error(error.message || "Invalid OTP"); 
     } else {
-      alert("Verification successful! You can now log in.");
-      onSuccess(); 
+      setShowSuccessModal(true); 
     }
   }
 
-  // RENDER: OTP SCREEN
-  if (step === 2) {
+  if (showSuccessModal) {
     return (
-      <div style={{ textAlign: "center" }}>
-        <ShieldCheck size={48} color={CRIMSON} style={{ margin: "0 auto 16px" }} />
-        <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8, color: "#111" }}>Check your email</h2>
-        <p style={{ fontSize: 14, color: "#666", marginBottom: 24 }}>We sent a 8-digit code to <strong>{form.email}</strong>.</p>
-        
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <input
-            type="text"
-            maxLength="8"
-            placeholder="••••••"
-            value={form.otp}
-            onChange={set("otp")}
-            style={{ width: "100%", padding: "12px", fontSize: 24, letterSpacing: 8, textAlign: "center", border: "1px solid #e5e5e5", borderRadius: 8 }}
-          />
-          <button
-            style={{ width: "100%", padding: "12px", background: CRIMSON, color: "#fff", border: "none", borderRadius: 8, fontWeight: 600, cursor: "pointer", opacity: loading ? 0.7 : 1 }}
-            onClick={handleOTPSubmit}
-            disabled={loading}
-          >
-            {loading ? "Verifying..." : "Verify Account"}
-          </button>
-        </div>
+      <div style={{ textAlign: "center", padding: "40px 20px" }}>
+        <ShieldCheck size={64} color="#52c41a" style={{ margin: "0 auto 16px" }} />
+        <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8, color: "#111" }}>Account Verified!</h2>
+        <p style={{ fontSize: 14, color: "#666", marginBottom: 24 }}>Your email has been successfully verified.</p>
+        <button
+          style={{ width: "100%", padding: "12px", background: CRIMSON, color: "#fff", border: "none", borderRadius: 8, fontWeight: 600, cursor: "pointer" }}
+          onClick={onSuccess}
+          onMouseEnter={e => { e.target.style.background = CRIMSON_DARK; }} 
+          onMouseLeave={e => { e.target.style.background = CRIMSON; }}
+        >
+          Continue to Login
+        </button>
       </div>
     );
   }
 
-  // RENDER: REGISTRATION SCREEN
+  if (step === 2) {
+    return (
+      <>
+        <Toaster position="top-center" reverseOrder={false} />
+        <div style={{ textAlign: "center" }}>
+          <ShieldCheck size={48} color={CRIMSON} style={{ margin: "0 auto 16px" }} />
+          <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8, color: "#111" }}>Check your email</h2>
+          <p style={{ fontSize: 14, color: "#666", marginBottom: 24 }}>We sent a 8-digit code to <strong>{form.email}</strong>.</p>
+          
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <input
+              type="text"
+              maxLength="8"
+              placeholder="••••••••"
+              value={form.otp}
+              onChange={set("otp")}
+              style={{ width: "100%", padding: "12px", fontSize: 24, letterSpacing: 8, textAlign: "center", border: "1px solid #e5e5e5", borderRadius: 8, outline: "none", transition: "all 0.2s" }}
+              onFocus={e => { e.target.style.borderColor = CRIMSON; e.target.style.background = "#fff"; }}
+              onBlur={e => { e.target.style.borderColor = "#e5e5e5"; e.target.style.background = "transparent"; }}
+            />
+            <button
+              style={{ width: "100%", padding: "12px", background: CRIMSON, color: "#fff", border: "none", borderRadius: 8, fontWeight: 600, cursor: "pointer", opacity: loading ? 0.7 : 1 }}
+              onClick={handleOTPSubmit}
+              disabled={loading}
+              onMouseEnter={e => { e.target.style.background = CRIMSON_DARK; }} 
+              onMouseLeave={e => { e.target.style.background = CRIMSON; }}
+            >
+              {loading ? "Verifying..." : "Verify Account"}
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
+      <Toaster position="top-center" reverseOrder={false} />
       <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8, color: "#111" }}>Create your account</h2> 
       <p style={{ fontSize: 14, color: "#666", marginBottom: 24 }}>Fill in the details below to get started.</p> 
 
@@ -108,18 +145,41 @@ export default function Register({ onSuccess }) {
         <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#444", marginBottom: 6 }}>Password</label> 
         <div style={{ position: "relative", display: "flex", alignItems: "center" }}> 
           <span style={{ position: "absolute", left: 12, color: "#999" }}><Lock size={16} /></span> 
-          <input type={showPass ? "text" : "password"} value={form.password} onChange={set("password")} style={{ width: "100%", padding: "10px 40px", border: "1px solid #e5e5e5", borderRadius: 8 }} /> 
+          <input 
+            type={showPass ? "text" : "password"} 
+            value={form.password} 
+            onChange={set("password")} 
+            style={{ width: "100%", padding: "10px 40px", border: "1px solid #e5e5e5", borderRadius: 8, outline: "none", transition: "all 0.2s" }} 
+            onFocus={e => { e.target.style.borderColor = CRIMSON; e.target.style.background = "#fff"; }}
+            onBlur={e => { e.target.style.borderColor = "#e5e5e5"; e.target.style.background = "transparent"; }}
+          />
           <button style={{ position: "absolute", right: 12, background: "none", border: "none", cursor: "pointer", color: "#999" }} onClick={() => setShowPass(!showPass)}> 
             {showPass ? <EyeOff size={15} /> : <Eye size={15} />} 
           </button> 
         </div>
+        
+        {form.password && (
+          <div style={{ marginTop: 8 }}>
+            <div style={{ height: 4, width: "100%", backgroundColor: "#e5e5e5", borderRadius: 2, overflow: "hidden" }}>
+              <div style={{ height: "100%", width: strength.width, backgroundColor: strength.color, transition: "all 0.3s ease" }} />
+            </div>
+            <p style={{ fontSize: 12, color: strength.color, marginTop: 4, fontWeight: 600 }}>{strength.label}</p>
+          </div>
+        )}
       </div>
 
       <div style={{ marginBottom: 16 }}> 
         <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#444", marginBottom: 6 }}>Confirm Password</label> 
         <div style={{ position: "relative", display: "flex", alignItems: "center" }}> 
           <span style={{ position: "absolute", left: 12, color: "#999" }}><Lock size={16} /></span> 
-          <input type={showConfirm ? "text" : "password"} value={form.confirm} onChange={set("confirm")} style={{ width: "100%", padding: "10px 40px", border: "1px solid #e5e5e5", borderRadius: 8 }} /> 
+          <input 
+            type={showConfirm ? "text" : "password"} 
+            value={form.confirm} 
+            onChange={set("confirm")} 
+            style={{ width: "100%", padding: "10px 40px", border: "1px solid #e5e5e5", borderRadius: 8, outline: "none", transition: "all 0.2s" }} 
+            onFocus={e => { e.target.style.borderColor = CRIMSON; e.target.style.background = "#fff"; }}
+            onBlur={e => { e.target.style.borderColor = "#e5e5e5"; e.target.style.background = "transparent"; }}
+          />
           <button style={{ position: "absolute", right: 12, background: "none", border: "none", cursor: "pointer", color: "#999" }} onClick={() => setShowConfirm(!showConfirm)}> 
             {showConfirm ? <EyeOff size={15} /> : <Eye size={15} />} 
           </button> 
@@ -128,15 +188,16 @@ export default function Register({ onSuccess }) {
 
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 24 }}> 
         <input type="checkbox" id="terms" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={{ cursor: "pointer" }} /> 
-        <label htmlFor="terms" style={{ fontSize: 13, color: "#666" }}>I agree to the Terms of Service</label> 
       </div> 
 
       <button
-        style={{ width: "100%", padding: "12px", background: CRIMSON, color: "#fff", border: "none", borderRadius: 8, fontWeight: 600, cursor: "pointer", opacity: loading || strength.score < 2 || !passwordsMatch || !agreed ? 0.6 : 1 }} 
+        style={{ width: "100%", padding: "12px", background: CRIMSON, color: "#fff", border: "none", borderRadius: 8, fontWeight: 600, cursor: "pointer", opacity: loading || strength.score < 2 || !passwordsMatch || !agreed ? 0.6 : 1, transition: "background 0.2s" }} 
         onClick={handleRegisterSubmit} 
         disabled={strength.score < 2 || !passwordsMatch || !agreed || loading}
+        onMouseEnter={e => { if (!e.target.disabled) e.target.style.background = CRIMSON_DARK; }} 
+        onMouseLeave={e => { if (!e.target.disabled) e.target.style.background = CRIMSON; }}
       >
-        {loading ? "Sending OTP..." : <>Create Account </>} 
+        {loading ? "Sending OTP..." : "Create Account"} 
       </button> 
     </>
   );

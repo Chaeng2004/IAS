@@ -1,31 +1,53 @@
 import { useState } from "react";
-import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import InputField from "../shared/InputField";
 import { styles, CRIMSON, CRIMSON_DARK } from "../styles/authStyle";
 import { supabase } from "../supabase"; 
 import toast, { Toaster } from 'react-hot-toast'; 
 
 export default function Login({ onSuccess }) {
-  // Login States
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   
-  // Password Reset States
   const [isResetMode, setIsResetMode] = useState(false);
-  const [resetStep, setResetStep] = useState(1); // 1 = Email, 2 = Code, 3 = New Password
+  const [resetStep, setResetStep] = useState(1); 
   const [resetCode, setResetCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  const getPasswordStrength = (pass) => {
+    let score = 0;
+    if (!pass) return { score: 0, width: "0%", color: "transparent", label: "" };
+    if (pass.length >= 8) score += 1;
+    if (/[A-Z]/.test(pass)) score += 1;
+    if (/[0-9]/.test(pass)) score += 1;
+    if (/[^A-Za-z0-9]/.test(pass)) score += 1; 
+
+    let width = "0%";
+    let color = "transparent";
+    let label = "";
+
+    if (score <= 1) { 
+      width = "33%"; color = "#ff4d4f"; label = "Weak"; 
+    } else if (score === 2) { 
+      width = "66%"; color = "#faad14"; label = "Medium"; 
+    } else if (score >= 3) { 
+      width = "100%"; color = "#52c41a"; label = "Strong"; 
+    }
+
+    return { score, width, color, label }; 
+  };
+
+  const strength = getPasswordStrength(newPassword);
+  const passwordsMatch = newPassword.length > 0 && newPassword === confirmPassword;
 
   async function handleSubmit() {
     setLoading(true);
 
     if (isResetMode) {
-      // --- FORGOT PASSWORD FLOW ---
       if (resetStep === 1) {
-        // STEP 1: Send the Code
         if (!email) {
           toast.error("Please enter your email.");
           setLoading(false);
@@ -42,7 +64,6 @@ export default function Login({ onSuccess }) {
         }
         
       } else if (resetStep === 2) {
-        // STEP 2: Verify the Code
         if (!resetCode || resetCode.length !== 8) {
           toast.error("Please enter the 8-digit code.");
           setLoading(false);
@@ -59,44 +80,40 @@ export default function Login({ onSuccess }) {
           toast.error(error.message);
         } else {
           toast.success("Code verified! Please set your new password.");
-          setResetStep(3); // Move to the New Password step
+          setResetStep(3); 
         }
         
-        } else if (resetStep === 3) {
-          if (!newPassword || newPassword.length < 8) {
-            toast.error("Password must be at least 8 characters.");
-            setLoading(false);
-            return;
-          }
-          if (newPassword !== confirmPassword) {
-            toast.error("Passwords do not match.");
-            setLoading(false);
-            return;
-          }
+      } else if (resetStep === 3) {
+        if (strength.score < 2) {
+          toast.error("Please enter a stronger password.");
+          setLoading(false);
+          return;
+        }
+        if (!passwordsMatch) {
+          toast.error("Passwords do not match.");
+          setLoading(false);
+          return;
+        }
 
-          const { error } = await supabase.auth.updateUser({ password: newPassword });
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
 
-          if (error) {
-            toast.error(error.message);
-          } else {
-            toast.success("Password updated! Please log in with your new password.");
+        if (error) {
+          toast.error(error.message);
+        } else {
+          toast.success("Password updated! Please log in with your new password.");
 
           setTimeout(() => {
-     
-          setIsResetMode(false);
-     
-          setResetStep(1);
-          setResetCode("");
-          setNewPassword("");
-          setConfirmPassword("");
-      
-          setPassword(""); 
-        }, 2000); // Give them 2 seconds to read the success message
+            setIsResetMode(false);
+            setResetStep(1);
+            setResetCode("");
+            setNewPassword("");
+            setConfirmPassword("");
+            setPassword(""); 
+          }, 2000); 
+        }
       }
-    }
       
     } else {
-      // --- NORMAL LOGIN FLOW ---
       if (!email || !password) {
         toast.error("Please fill in all required fields.");
         setLoading(false);
@@ -118,11 +135,12 @@ export default function Login({ onSuccess }) {
     setLoading(false);
   }
 
+  const isSubmitDisabled = loading || (isResetMode && resetStep === 3 && (strength.score < 2 || !passwordsMatch));
+
   return (
     <>
       <Toaster position="top-center" reverseOrder={false} />
 
-      {/* Dynamic Headers */}
       <h2 style={styles.heading}>
         {isResetMode 
           ? (resetStep === 1 ? "Reset Password" : resetStep === 2 ? "Enter Reset Code" : "Set New Password") 
@@ -136,7 +154,6 @@ export default function Login({ onSuccess }) {
           : "Sign in to your account to continue."}
       </p>
 
-      {/* Dynamic Form Inputs */}
       {isResetMode ? (
         resetStep === 1 ? (
           <InputField label="Email Address" icon={<Mail size={16} />} type="email" placeholder="you@gmail.com" value={email} onChange={e => setEmail(e.target.value)} />
@@ -144,20 +161,29 @@ export default function Login({ onSuccess }) {
           <InputField label="Verification Code" icon={<Lock size={16} />} type="text" placeholder="Enter 8-digit code" value={resetCode} onChange={e => setResetCode(e.target.value)} />
         ) : (
           <>
-            {/* Step 3 UI: New Password Fields */}
             <div style={styles.fieldGroup}>
               <div style={styles.inlineRow}><label style={{ ...styles.label, marginBottom: 0 }}>New Password</label></div>
               <div style={styles.inputWrap}>
                 <span style={styles.inputIcon}><Lock size={16} /></span>
                 <input
-                  type={showPass ? "text" : "password"} placeholder="••••••••" value={newPassword} onChange={e => setNewPassword(e.target.value)} style={styles.input}
+                  type={showPass ? "text" : "password"} placeholder="••••••••" value={newPassword} onChange={e => setNewPassword(e.target.value)} 
+                  style={{ ...styles.input, outline: "none", transition: "all 0.2s" }}
                   onFocus={e => { e.target.style.borderColor = CRIMSON; e.target.style.background = "#fff"; }}
-                  onBlur={e => { e.target.style.borderColor = "#e5e5e5"; e.target.style.background = "#fafafa"; }}
+                  onBlur={e => { e.target.style.borderColor = "#e5e5e5"; e.target.style.background = "transparent"; }}
                 />
                 <button style={styles.eyeBtn} onClick={() => setShowPass(v => !v)}>
                   {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
+              
+              {newPassword && (
+                <div style={{ marginTop: 8 }}>
+                  <div style={{ height: 4, width: "100%", backgroundColor: "#e5e5e5", borderRadius: 2, overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: strength.width, backgroundColor: strength.color, transition: "all 0.3s ease" }} />
+                  </div>
+                  <p style={{ fontSize: 12, color: strength.color, marginTop: 4, fontWeight: 600 }}>{strength.label}</p>
+                </div>
+              )}
             </div>
 
             <div style={styles.fieldGroup}>
@@ -165,20 +191,19 @@ export default function Login({ onSuccess }) {
               <div style={styles.inputWrap}>
                 <span style={styles.inputIcon}><Lock size={16} /></span>
                 <input
-                  type={showPass ? "text" : "password"} placeholder="••••••••" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} style={styles.input}
+                  type={showPass ? "text" : "password"} placeholder="••••••••" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} 
+                  style={{ ...styles.input, outline: "none", transition: "all 0.2s" }}
                   onFocus={e => { e.target.style.borderColor = CRIMSON; e.target.style.background = "#fff"; }}
-                  onBlur={e => { e.target.style.borderColor = "#e5e5e5"; e.target.style.background = "#fafafa"; }}
+                  onBlur={e => { e.target.style.borderColor = "#e5e5e5"; e.target.style.background = "transparent"; }}
                 />
               </div>
             </div>
           </>
         )
       ) : (
-        // Normal Login Email Field
         <InputField label="Email Address" icon={<Mail size={16} />} type="email" placeholder="you@gmail.com" value={email} onChange={e => setEmail(e.target.value)} />
       )}
 
-      {/* Normal Login Password Field */}
       {!isResetMode && (
         <div style={styles.fieldGroup}>
           <div style={styles.inlineRow}>
@@ -190,9 +215,10 @@ export default function Login({ onSuccess }) {
           <div style={styles.inputWrap}>
             <span style={styles.inputIcon}><Lock size={16} /></span>
             <input
-              type={showPass ? "text" : "password"} placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} style={styles.input}
+              type={showPass ? "text" : "password"} placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} 
+              style={{ ...styles.input, outline: "none", transition: "all 0.2s" }}
               onFocus={e => { e.target.style.borderColor = CRIMSON; e.target.style.background = "#fff"; }}
-              onBlur={e => { e.target.style.borderColor = "#e5e5e5"; e.target.style.background = "#fafafa"; }}
+              onBlur={e => { e.target.style.borderColor = "#e5e5e5"; e.target.style.background = "transparent"; }}
             />
             <button style={styles.eyeBtn} onClick={() => setShowPass(v => !v)}>
               {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
@@ -201,20 +227,20 @@ export default function Login({ onSuccess }) {
         </div>
       )}
 
-      {/* Dynamic Submit Button */}
       <button
-        style={{ ...styles.submitBtn, marginTop: 22, opacity: loading ? 0.8 : 1 }} onClick={handleSubmit}
-        onMouseEnter={e => { e.target.style.background = CRIMSON_DARK; }} onMouseLeave={e => { e.target.style.background = CRIMSON; }}
+        style={{ ...styles.submitBtn, marginTop: 22, opacity: isSubmitDisabled ? 0.6 : 1, transition: "background 0.2s", cursor: isSubmitDisabled ? "not-allowed" : "pointer" }} 
+        onClick={handleSubmit}
+        disabled={isSubmitDisabled}
+        onMouseEnter={e => { if (!e.target.disabled) e.target.style.background = CRIMSON_DARK; }} 
+        onMouseLeave={e => { if (!e.target.disabled) e.target.style.background = CRIMSON; }}
       >
         {loading ? "Processing…" : <>
           {isResetMode 
             ? (resetStep === 1 ? "Send Reset Code" : resetStep === 2 ? "Verify Code" : "Update Password") 
             : "Sign In"} 
-          
         </>}
       </button>
 
-      {/* Go Back / Cancel Button */}
       {isResetMode && (
         <button 
             onClick={() => {
