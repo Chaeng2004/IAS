@@ -182,7 +182,7 @@ export default function Dashboard({ onLogout }) {
           </div>
         </div>
       ) : (
-        <Profile userEmail={userEmail} />
+        <Profile userEmail={userEmail} ciaCompleted={ciaCompleted} />
       )}
 
       {showLogoutModal && (

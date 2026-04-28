@@ -1,7 +1,7 @@
 import React from "react";
 import { User, CheckCircle } from "lucide-react";
 
-export default function Profile({ userEmail }) {
+export default function Profile({ userEmail, ciaCompleted }) {
   return (
     <div className="profile-card" style={{ background: "#fff", border: "1px solid #e5e5e5", borderRadius: "12px", padding: "32px", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)" }}>
       <style>{`
@@ -25,7 +25,7 @@ export default function Profile({ userEmail }) {
         </div>
 
         <div style={{ flex: 1 }}>
-          <h2 style={{ fontSize: "24px", color: "#111", marginBottom: "4px" }}>Verified Protected User</h2>
+          <h2 style={{ fontSize: "24px", color: "#111", marginBottom: "4px" }}>Protected User</h2>
           <p style={{ color: "#666", fontSize: "16px" }}>{userEmail}</p>
 
           <div className="profile-stats-grid">
@@ -37,8 +37,10 @@ export default function Profile({ userEmail }) {
             </div>
             
             <div className="stat-box">
-              <p style={{ fontSize: "12px", color: "#64748b", textTransform: "uppercase", fontWeight: "700", marginBottom: "6px" }}>Clearance Level</p>
-              <p style={{ fontSize: "16px", color: "#111", fontWeight: "600" }}>Student</p>
+              <p style={{ fontSize: "12px", color: "#64748b", textTransform: "uppercase", fontWeight: "700", marginBottom: "6px" }}>WebGoat Task Progress</p>
+              <p style={{ fontSize: "16px", color: ciaCompleted ? "#16a34a" : "#d97706", fontWeight: "600" }}>
+                {ciaCompleted ? "1/1 Modules Completed" : "0/1 Modules Completed"}
+              </p>
             </div> 
           </div>
         </div>
