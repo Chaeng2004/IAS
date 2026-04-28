@@ -62,33 +62,38 @@ export default function Login({ onSuccess }) {
           setResetStep(3); // Move to the New Password step
         }
         
-      } else if (resetStep === 3) {
-        // STEP 3: Set New Password
-        if (!newPassword || newPassword.length < 8) {
-          toast.error("Password must be at least 8 characters.");
-          setLoading(false);
-          return;
-        }
-        if (newPassword !== confirmPassword) {
-          toast.error("Passwords do not match.");
-          setLoading(false);
-          return;
-        }
+        } else if (resetStep === 3) {
+          if (!newPassword || newPassword.length < 8) {
+            toast.error("Password must be at least 8 characters.");
+            setLoading(false);
+            return;
+          }
+          if (newPassword !== confirmPassword) {
+            toast.error("Passwords do not match.");
+            setLoading(false);
+            return;
+          }
 
-        // Because Step 2 verified the OTP, Supabase established a secure session in the background.
-        // We can now safely call updateUser to set the new password!
-        const { error } = await supabase.auth.updateUser({ password: newPassword });
+          const { error } = await supabase.auth.updateUser({ password: newPassword });
 
-        if (error) {
-          toast.error(error.message);
-        } else {
-          toast.success("Password updated successfully!");
-          // Small delay before dropping them into the dashboard
+          if (error) {
+            toast.error(error.message);
+          } else {
+            toast.success("Password updated! Please log in with your new password.");
+
           setTimeout(() => {
-            onSuccess(); 
-          }, 1000);
-        }
+     
+          setIsResetMode(false);
+     
+          setResetStep(1);
+          setResetCode("");
+          setNewPassword("");
+          setConfirmPassword("");
+      
+          setPassword(""); 
+        }, 2000); // Give them 2 seconds to read the success message
       }
+    }
       
     } else {
       // --- NORMAL LOGIN FLOW ---
@@ -205,7 +210,7 @@ export default function Login({ onSuccess }) {
           {isResetMode 
             ? (resetStep === 1 ? "Send Reset Code" : resetStep === 2 ? "Verify Code" : "Update Password") 
             : "Sign In"} 
-          <ArrowRight size={16} />
+          
         </>}
       </button>
 

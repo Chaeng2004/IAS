@@ -136,7 +136,7 @@ export default function Register({ onSuccess }) {
         onClick={handleRegisterSubmit} 
         disabled={strength.score < 2 || !passwordsMatch || !agreed || loading}
       >
-        {loading ? "Sending OTP..." : <>Create Account <ArrowRight size={16} style={{ display: "inline", verticalAlign: "middle" }} /></>} 
+        {loading ? "Sending OTP..." : <>Create Account </>} 
       </button> 
     </>
   );
