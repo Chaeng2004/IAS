@@ -138,7 +138,7 @@ export default function Login({ onSuccess }) {
   const isSubmitDisabled = loading || (isResetMode && resetStep === 3 && (strength.score < 2 || !passwordsMatch));
 
   return (
-    <>
+    <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
       <Toaster position="top-center" reverseOrder={false} />
 
       <h2 style={styles.heading}>
@@ -171,7 +171,7 @@ export default function Login({ onSuccess }) {
                   onFocus={e => { e.target.style.borderColor = CRIMSON; e.target.style.background = "#fff"; }}
                   onBlur={e => { e.target.style.borderColor = "#e5e5e5"; e.target.style.background = "transparent"; }}
                 />
-                <button style={styles.eyeBtn} onClick={() => setShowPass(v => !v)}>
+                <button type="button" style={styles.eyeBtn} onClick={() => setShowPass(v => !v)}>
                   {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
@@ -208,7 +208,7 @@ export default function Login({ onSuccess }) {
         <div style={styles.fieldGroup}>
           <div style={styles.inlineRow}>
             <label style={{ ...styles.label, marginBottom: 0 }}>Password</label>
-            <button style={styles.forgotLink} onClick={() => setIsResetMode(true)}>
+            <button type="button" style={styles.forgotLink} onClick={() => setIsResetMode(true)}>
                 Forgot password?
             </button>
           </div>
@@ -220,7 +220,7 @@ export default function Login({ onSuccess }) {
               onFocus={e => { e.target.style.borderColor = CRIMSON; e.target.style.background = "#fff"; }}
               onBlur={e => { e.target.style.borderColor = "#e5e5e5"; e.target.style.background = "transparent"; }}
             />
-            <button style={styles.eyeBtn} onClick={() => setShowPass(v => !v)}>
+            <button type="button" style={styles.eyeBtn} onClick={() => setShowPass(v => !v)}>
               {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
           </div>
@@ -228,8 +228,8 @@ export default function Login({ onSuccess }) {
       )}
 
       <button
+        type="submit"
         style={{ ...styles.submitBtn, marginTop: 22, opacity: isSubmitDisabled ? 0.6 : 1, transition: "background 0.2s", cursor: isSubmitDisabled ? "not-allowed" : "pointer" }} 
-        onClick={handleSubmit}
         disabled={isSubmitDisabled}
         onMouseEnter={e => { if (!e.target.disabled) e.target.style.background = CRIMSON_DARK; }} 
         onMouseLeave={e => { if (!e.target.disabled) e.target.style.background = CRIMSON; }}
@@ -243,6 +243,7 @@ export default function Login({ onSuccess }) {
 
       {isResetMode && (
         <button 
+            type="button"
             onClick={() => {
               setIsResetMode(false);
               setResetStep(1); 
@@ -255,6 +256,6 @@ export default function Login({ onSuccess }) {
             Wait, I remember it! Go back.
         </button>
       )}
-    </>
+    </form>
   );
 }

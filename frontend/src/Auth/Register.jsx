@@ -87,6 +87,7 @@ export default function Register({ onSuccess }) {
         <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8, color: "#111" }}>Account Verified!</h2>
         <p style={{ fontSize: 14, color: "#666", marginBottom: 24 }}>Your email has been successfully verified.</p>
         <button
+          type="button"
           style={{ width: "100%", padding: "12px", background: CRIMSON, color: "#fff", border: "none", borderRadius: 8, fontWeight: 600, cursor: "pointer" }}
           onClick={onSuccess}
           onMouseEnter={e => { e.target.style.background = CRIMSON_DARK; }} 
@@ -107,7 +108,7 @@ export default function Register({ onSuccess }) {
           <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8, color: "#111" }}>Check your email</h2>
           <p style={{ fontSize: 14, color: "#666", marginBottom: 24 }}>We sent a 8-digit code to <strong>{form.email}</strong>.</p>
           
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <form onSubmit={(e) => { e.preventDefault(); handleOTPSubmit(); }} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <input
               type="text"
               maxLength="8"
@@ -119,22 +120,22 @@ export default function Register({ onSuccess }) {
               onBlur={e => { e.target.style.borderColor = "#e5e5e5"; e.target.style.background = "transparent"; }}
             />
             <button
+              type="submit"
               style={{ width: "100%", padding: "12px", background: CRIMSON, color: "#fff", border: "none", borderRadius: 8, fontWeight: 600, cursor: "pointer", opacity: loading ? 0.7 : 1 }}
-              onClick={handleOTPSubmit}
               disabled={loading}
               onMouseEnter={e => { e.target.style.background = CRIMSON_DARK; }} 
               onMouseLeave={e => { e.target.style.background = CRIMSON; }}
             >
               {loading ? "Verifying..." : "Verify Account"}
             </button>
-          </div>
+          </form>
         </div>
       </>
     );
   }
 
   return (
-    <>
+    <form onSubmit={(e) => { e.preventDefault(); handleRegisterSubmit(); }}>
       <Toaster position="top-center" reverseOrder={false} />
       <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8, color: "#111" }}>Create your account</h2> 
       <p style={{ fontSize: 14, color: "#666", marginBottom: 24 }}>Fill in the details below to get started.</p> 
@@ -153,7 +154,7 @@ export default function Register({ onSuccess }) {
             onFocus={e => { e.target.style.borderColor = CRIMSON; e.target.style.background = "#fff"; }}
             onBlur={e => { e.target.style.borderColor = "#e5e5e5"; e.target.style.background = "transparent"; }}
           />
-          <button style={{ position: "absolute", right: 12, background: "none", border: "none", cursor: "pointer", color: "#999" }} onClick={() => setShowPass(!showPass)}> 
+          <button type="button" style={{ position: "absolute", right: 12, background: "none", border: "none", cursor: "pointer", color: "#999" }} onClick={() => setShowPass(!showPass)}> 
             {showPass ? <EyeOff size={15} /> : <Eye size={15} />} 
           </button> 
         </div>
@@ -180,21 +181,21 @@ export default function Register({ onSuccess }) {
             onFocus={e => { e.target.style.borderColor = CRIMSON; e.target.style.background = "#fff"; }}
             onBlur={e => { e.target.style.borderColor = "#e5e5e5"; e.target.style.background = "transparent"; }}
           />
-          <button style={{ position: "absolute", right: 12, background: "none", border: "none", cursor: "pointer", color: "#999" }} onClick={() => setShowConfirm(!showConfirm)}> 
+          <button type="button" style={{ position: "absolute", right: 12, background: "none", border: "none", cursor: "pointer", color: "#999" }} onClick={() => setShowConfirm(!showConfirm)}> 
             {showConfirm ? <EyeOff size={15} /> : <Eye size={15} />} 
           </button> 
         </div>
       </div>
 
       <button
+        type="submit"
         style={{ width: "100%", padding: "12px", background: CRIMSON, color: "#fff", border: "none", borderRadius: 8, fontWeight: 600, cursor: "pointer", opacity: loading || strength.score < 2 || !passwordsMatch ? 0.6 : 1, transition: "background 0.2s" }} 
-        onClick={handleRegisterSubmit} 
         disabled={strength.score < 2 || !passwordsMatch || loading}
         onMouseEnter={e => { if (!e.target.disabled) e.target.style.background = CRIMSON_DARK; }} 
         onMouseLeave={e => { if (!e.target.disabled) e.target.style.background = CRIMSON; }}
       >
         {loading ? "Sending OTP..." : "Create Account"} 
       </button> 
-    </>
+    </form>
   );
 }
