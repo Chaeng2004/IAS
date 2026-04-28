@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Mail, Lock, User, Eye, EyeOff, ArrowRight, ShieldCheck } from "lucide-react"; 
+import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck } from "lucide-react"; 
 import { CRIMSON, CRIMSON_DARK } from "../styles/authStyle"; 
 import InputField from "../shared/InputField"; 
+import { supabase } from "../supabase"; // Import Supabase
 
 export default function Register({ onSuccess }) {
   const [step, setStep] = useState(1); 
-  const [form, setForm] = useState({ first: "", last: "", email: "", password: "", confirm: "", otp: "" }); 
+  const [form, setForm] = useState({ email: "", password: "", confirm: "", otp: "" }); 
   const [showPass, setShowPass] = useState(false); 
   const [showConfirm, setShowConfirm] = useState(false); 
   const [agreed, setAgreed] = useState(false); 
@@ -15,72 +16,58 @@ export default function Register({ onSuccess }) {
 
   const getPasswordStrength = (pass) => {
     let score = 0;
-    if (!pass) return { score: 0, label: "", color: "#e5e5e5", width: "0%" };
+    if (!pass) return { score: 0, width: "0%" };
     if (pass.length >= 8) score += 1;
     if (/[A-Z]/.test(pass)) score += 1;
     if (/[0-9]/.test(pass)) score += 1;
     if (/[^A-Za-z0-9]/.test(pass)) score += 1; 
-    if (score <= 1) return { score, label: "Weak", color: "#ef4444", width: "33%" }; 
-    if (score <= 3) return { score, label: "Medium", color: "#eab308", width: "66%" }; 
-    return { score, label: "Strong", color: "#22c55e", width: "100%" }; 
+    return { score }; 
   };
 
   const strength = getPasswordStrength(form.password);
   const passwordsMatch = form.password.length > 0 && form.password === form.confirm;
 
+  // 1. Send Registration to Supabase
   async function handleRegisterSubmit() {
     if (!form.email || strength.score < 2 || !passwordsMatch || !agreed) return; 
     setLoading(true); 
 
-    try {
-      const API_URL = import.meta.env.VITE_API_URL;
-      const response = await fetch(`${API_URL}/api/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.email, password: form.password }) 
-      });
+    const { error } = await supabase.auth.signUp({
+      email: form.email,
+      password: form.password,
+    });
 
-      const data = await response.json();
+    setLoading(false);
 
-      if (response.ok) {
-        setStep(2); 
-      } else {
-        alert(data.error || "Registration failed");
-      }
-    } catch (error) {
-      alert("Cannot connect to server.");
-    } finally {
-      setLoading(false);
+    if (error) {
+      alert(error.message);
+    } else {
+      setStep(2); // Move to OTP screen
     }
   }
 
+  // 2. Verify Supabase OTP
   async function handleOTPSubmit() {
-    if (!form.otp || form.otp.length < 6) return;
+    if (!form.otp || form.otp.length !== 6) return;
     setLoading(true);
 
-    try {
-      const API_URL = import.meta.env.VITE_API_URL;
-      const response = await fetch(`${API_URL}/api/verify-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.email, otp: form.otp }) 
-      });
+    const { error } = await supabase.auth.verifyOtp({
+      email: form.email,
+      token: form.otp,
+      type: 'signup' // Tells Supabase this is a new account verification
+    });
 
-      const data = await response.json();
+    setLoading(false);
 
-      if (response.ok) {
-        alert("Verification successful! You can now log in.");
-        onSuccess(); 
-      } else {
-        alert(data.error || "Invalid OTP");
-      }
-    } catch (error) {
-      alert("Cannot connect to server.");
-    } finally {
-      setLoading(false);
+    if (error) {
+      alert(error.message || "Invalid OTP");
+    } else {
+      alert("Verification successful! You can now log in.");
+      onSuccess(); 
     }
   }
 
+  // RENDER: OTP SCREEN
   if (step === 2) {
     return (
       <div style={{ textAlign: "center" }}>
@@ -109,6 +96,7 @@ export default function Register({ onSuccess }) {
     );
   }
 
+  // RENDER: REGISTRATION SCREEN
   return (
     <>
       <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8, color: "#111" }}>Create your account</h2> 

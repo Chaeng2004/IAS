@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { LogOut, ExternalLink, ShieldAlert, CheckCircle, Info, User, AlertTriangle } from "lucide-react";
 import { CRIMSON, CRIMSON_DARK } from "../styles/authStyle"; 
 import webgoatProof from "../assets/webgoat-proof.jpg"; 
+import { supabase } from "../supabase"; // Import Supabase
 
 export default function Dashboard({ onLogout }) {
   const [webGoatUrl, setWebGoatUrl] = useState("");
@@ -14,24 +15,22 @@ export default function Dashboard({ onLogout }) {
 
   useEffect(() => {
     const fetchLink = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
+      // 1. Get the secure session directly from Supabase
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (!session || sessionError) {
         setError("Unauthorized. Please log in.");
         setLoading(false);
         return;
       }
 
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        setUserEmail(payload.email);
-      } catch (e) {
-        console.error("Could not decode token");
-      }
+      setUserEmail(session.user.email);
 
+      // 2. Fetch the WebGoat link from your Backend using the Supabase token
       try {
         const API_URL = import.meta.env.VITE_API_URL;
         const response = await fetch(`${API_URL}/api/webgoat-link`, {
-          headers: { "Authorization": token }
+          headers: { "Authorization": session.access_token } // Use Supabase token!
         });
         
         const data = await response.json();
@@ -51,8 +50,8 @@ export default function Dashboard({ onLogout }) {
     fetchLink();
   }, []);
 
-  const confirmLogout = () => {
-    localStorage.removeItem("token");
+  const confirmLogout = async () => {
+    await supabase.auth.signOut(); // Securely destroys session on the server
     onLogout();
   };
 
