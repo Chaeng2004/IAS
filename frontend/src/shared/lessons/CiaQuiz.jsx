@@ -11,10 +11,10 @@ export default function CiaQuiz({ isCompleted, onComplete, answers, setAnswers }
 
   const handleSubmitLesson = () => {
     if (
-      answers.q1 === "Solution 3" &&
-      answers.q2 === "Solution 1" &&
-      answers.q3 === "Solution 4" &&
-      answers.q4 === "Solution 2"
+      answers.q1 === "3" &&
+      answers.q2 === "1" &&
+      answers.q3 === "4" &&
+      answers.q4 === "2"
     ) {
       setLessonError("");
       onComplete();
@@ -52,8 +52,8 @@ export default function CiaQuiz({ isCompleted, onComplete, answers, setAnswers }
                 <div style={{ fontWeight: 600, fontSize: "15px", color: "#111", marginBottom: "12px" }}>{questions[index]}</div>
                 {optionsList[index].map((opt, i) => (
                   <label key={i} style={{ display: "flex", alignItems: "flex-start", gap: "10px", cursor: "pointer", padding: "8px", borderRadius: "6px", transition: "background 0.2s", fontSize: "14px", color: "#334155" }}>
-                    <input type="radio" name={qId} value={`Solution ${i+1}`} checked={answers[qId] === `Solution ${i+1}`} onChange={(e) => handleOptionChange(qId, e.target.value)} style={{ marginTop: "2px" }}/>
-                    Solution {i+1}: {opt}
+                    <input type="radio" name={qId} value={`${i+1}`} checked={answers[qId] === `${i+1}`} onChange={(e) => handleOptionChange(qId, e.target.value)} style={{ marginTop: "2px" }}/>
+                    {i+1}: {opt}
                   </label>
                 ))}
              </div>
