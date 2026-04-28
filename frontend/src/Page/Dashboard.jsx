@@ -154,7 +154,7 @@ export default function Dashboard({ onLogout }) {
 
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {loading ? (
-              <p style={{ color: "#666" }}>Decrypting secure link...</p>
+              <p style={{ color: "#666" }}>Connecting secure link...</p>
             ) : error ? (
               <p style={{ color: CRIMSON }}>{error}</p>
             ) : (
