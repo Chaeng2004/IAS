@@ -5,16 +5,18 @@ import { CRIMSON } from "../../styles/authStyle";
 export default function CiaQuiz({ isCompleted, onComplete, answers, setAnswers }) {
   const [lessonError, setLessonError] = useState("");
   
+  const currentAnswers = answers || {};
+  
   const handleOptionChange = (question, value) => {
-    setAnswers({ ...answers, [question]: value });
+    setAnswers(prev => ({ ...prev, [question]: value }));
   };
 
   const handleSubmitLesson = () => {
     if (
-      answers.q1 === "3" &&
-      answers.q2 === "1" &&
-      answers.q3 === "4" &&
-      answers.q4 === "2"
+      currentAnswers.q1 === "C" &&
+      currentAnswers.q2 === "A" &&
+      currentAnswers.q3 === "D" &&
+      currentAnswers.q4 === "B"
     ) {
       setLessonError("");
       onComplete();
@@ -50,12 +52,22 @@ export default function CiaQuiz({ isCompleted, onComplete, answers, setAnswers }
            return (
              <div key={qId} style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: "8px", padding: "20px", marginBottom: "16px" }}>
                 <div style={{ fontWeight: 600, fontSize: "15px", color: "#111", marginBottom: "12px" }}>{questions[index]}</div>
-                {optionsList[index].map((opt, i) => (
-                  <label key={i} style={{ display: "flex", alignItems: "flex-start", gap: "10px", cursor: "pointer", padding: "8px", borderRadius: "6px", transition: "background 0.2s", fontSize: "14px", color: "#334155" }}>
-                    <input type="radio" name={qId} value={`${i+1}`} checked={answers[qId] === `${i+1}`} onChange={(e) => handleOptionChange(qId, e.target.value)} style={{ marginTop: "2px" }}/>
-                    {i+1}: {opt}
-                  </label>
-                ))}
+                {optionsList[index].map((opt, i) => {
+                  const letter = String.fromCharCode(65 + i); 
+                  return (
+                    <label key={i} style={{ display: "flex", alignItems: "flex-start", gap: "10px", cursor: "pointer", padding: "8px", borderRadius: "6px", transition: "background 0.2s", fontSize: "14px", color: "#334155" }}>
+                      <input 
+                        type="radio" 
+                        name={qId} 
+                        value={letter} 
+                        checked={currentAnswers[qId] === letter} 
+                        onChange={(e) => handleOptionChange(qId, e.target.value)} 
+                        style={{ marginTop: "2px" }}
+                      />
+                      <span style={{ fontWeight: 600 }}>{letter}:</span> {opt}
+                    </label>
+                  );
+                })}
              </div>
            );
         })}
