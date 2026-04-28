@@ -36,6 +36,10 @@ export default function Dashboard({ onLogout }) {
 
       setUserEmail(session.user.email);
 
+      if (session.user.user_metadata?.ciaCompleted) {
+        setCiaCompleted(true);
+      }
+
       try {
         const API_URL = import.meta.env.VITE_API_URL;
         const response = await fetch(`${API_URL}/api/webgoat-link`, {
@@ -58,6 +62,18 @@ export default function Dashboard({ onLogout }) {
 
     fetchLink();
   }, []);
+
+  const handleCiaComplete = async () => {
+    setCiaCompleted(true); 
+    
+    const { error } = await supabase.auth.updateUser({
+      data: { ciaCompleted: true }
+    });
+
+    if (error) {
+      console.error("Failed to save progress to database:", error.message);
+    }
+  };
 
   const confirmLogout = async () => {
     await supabase.auth.signOut(); 
@@ -133,7 +149,7 @@ export default function Dashboard({ onLogout }) {
 
           <CiaLessonContainer 
             isCompleted={ciaCompleted} 
-            onComplete={() => setCiaCompleted(true)} 
+            onComplete={handleCiaComplete} 
           />
 
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
