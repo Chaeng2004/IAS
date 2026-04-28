@@ -187,9 +187,9 @@ export default function Register({ onSuccess }) {
       </div>
 
       <button
-        style={{ width: "100%", padding: "12px", background: CRIMSON, color: "#fff", border: "none", borderRadius: 8, fontWeight: 600, cursor: "pointer", opacity: loading || strength.score < 2 || !passwordsMatch || !agreed ? 0.6 : 1, transition: "background 0.2s" }} 
+        style={{ width: "100%", padding: "12px", background: CRIMSON, color: "#fff", border: "none", borderRadius: 8, fontWeight: 600, cursor: "pointer", opacity: loading || strength.score < 2 || !passwordsMatch ? 0.6 : 1, transition: "background 0.2s" }} 
         onClick={handleRegisterSubmit} 
-        disabled={strength.score < 2 || !passwordsMatch || !agreed || loading}
+        disabled={strength.score < 2 || !passwordsMatch || loading}
         onMouseEnter={e => { if (!e.target.disabled) e.target.style.background = CRIMSON_DARK; }} 
         onMouseLeave={e => { if (!e.target.disabled) e.target.style.background = CRIMSON; }}
       >
