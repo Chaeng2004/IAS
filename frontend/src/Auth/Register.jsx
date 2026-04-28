@@ -74,7 +74,7 @@ export default function Register({ onSuccess }) {
     if (error) {
       toast.error(error.message || "Invalid OTP"); 
     } else {
-      toast.success("Account Verified! Redirecting to login...");
+      toast.success("Account Verified! Signing in...");
       setTimeout(() => {
         onSuccess();
       }, 2000); 
